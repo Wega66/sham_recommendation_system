@@ -11,20 +11,30 @@ import 'package:sahm/core/themes/app_bar_theme.dart';
 import 'package:sahm/Features/botton_nav/home_nave.dart';
 import 'Features/splashScreen/splash_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+// firebase integration
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // Get the saved token from SharedPreferences
   AppStrings.token = await SharedPreferencesHelper.getString("token");
-  AppStrings.userId=await SharedPreferencesHelper.getString("userId");
-  AppStrings.userName=await SharedPreferencesHelper.getString("userName");
+  AppStrings.userId = await SharedPreferencesHelper.getString("userId");
+  AppStrings.userName = await SharedPreferencesHelper.getString("userName");
   log(AppStrings.token.toString());
 
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+   static final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  // tracking screenChange
+  static final FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
   const MyApp({super.key});
 
   @override
