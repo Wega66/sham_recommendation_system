@@ -12,6 +12,7 @@ import 'package:sahm/Features/auth/forget_password.dart';
 
 import 'package:sahm/Features/auth/sign_up.dart';
 import 'package:sahm/Features/botton_nav/home_nave.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -320,16 +321,23 @@ class _LoginScreenState extends State<LoginScreen> {
       print('Success');
       var getToken = json.decode(response.body);
       String token = getToken["token"];
-      String userId=getToken['_id'];
-      String userName=getToken['name'];
+      String userId = getToken['_id'];
+      String userName = getToken['name'];
       SharedPreferencesHelper.saveString("userName", userName);
-    SharedPreferencesHelper.saveString("userId", userId);
+      SharedPreferencesHelper.saveString("userId", userId);
       SharedPreferencesHelper.saveString("token", token);
 
       print(token);
       emailController.clear();
       passwordController.clear();
-
+// login event in Firebase Analytics
+      await FirebaseAnalytics.instance.logEvent(
+        name: "user_login",
+        parameters: {
+          "email": emailController.text,
+          "status": "success",
+        },
+      );
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeNave()),
@@ -341,6 +349,14 @@ class _LoginScreenState extends State<LoginScreen> {
       // var errorMessage = errorResponse["error"];
       // print(errorMessage);
       print(response.statusCode);
+      await FirebaseAnalytics.instance.logEvent(
+        name: "user_login",
+        parameters: {
+          "email": emailController.text,
+          "status": "failed",
+        },
+      );
+
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Incorrect email or password"),
       ));

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sahm/Features/cart/cubit/CartState.dart';
@@ -40,6 +40,11 @@ class CartCubit extends Cubit<CartState> {
         await _fetchProductDetails(cartModel);
         _cacheCart(cartModel);
         emit(CartLoaded(cartModel));
+        // Log event when cart is loaded
+        FirebaseAnalytics.instance.logEvent(
+          name: 'cart_loaded',
+          parameters: {'item_count': cartModel.cartItems?.length ?? 0},
+        );
       } else {
         emit(CartError('Failed to load cart items'));
       }
@@ -78,9 +83,8 @@ class CartCubit extends Cubit<CartState> {
 
     final currentCart = (state as CartLoaded).cartModel;
     final updatedCart = CartModel(
-      
-      cartItems: currentCart.cartItems
-          !.where((item) => item.id != cartItemId)
+      cartItems: currentCart.cartItems!
+          .where((item) => item.id != cartItemId)
           .toList(),
     );
 
@@ -100,6 +104,12 @@ class CartCubit extends Cubit<CartState> {
         emit(CartLoaded(currentCart));
         _cacheCart(currentCart);
         emit(CartError('Failed to remove item from cart'));
+      } else {
+        // Log item removed event
+        FirebaseAnalytics.instance.logEvent(
+          name: 'cart_item_removed',
+          parameters: {'cart_item_id': cartItemId},
+        );
       }
     } catch (e) {
       // If there's an error, revert the change
@@ -116,7 +126,6 @@ class CartCubit extends Cubit<CartState> {
   void invalidateCache() {
     _lastFetchTime = null;
   }
- 
 
   Future<void> updateCartItemQuantity(
       String cartItemId, int newQuantity) async {
@@ -155,6 +164,15 @@ class CartCubit extends Cubit<CartState> {
         emit(CartLoaded(currentCart));
         _cacheCart(currentCart);
         emit(CartError('Failed to update item quantity'));
+      } else {
+        // Log quantity update event
+        FirebaseAnalytics.instance.logEvent(
+          name: 'cart_item_quantity_updated',
+          parameters: {
+            'cart_item_id': cartItemId,
+            'new_quantity': newQuantity,
+          },
+        );
       }
     } catch (e) {
       // If there's an error, revert the change
@@ -163,5 +181,4 @@ class CartCubit extends Cubit<CartState> {
       emit(CartError('Error: $e'));
     }
   }
-
 }
