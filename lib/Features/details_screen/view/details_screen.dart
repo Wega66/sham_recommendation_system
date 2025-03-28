@@ -14,7 +14,7 @@ import 'package:sahm/Features/details_screen/widget/dropdownbutton.dart';
 import 'package:sahm/Features/details_screen/widget/listview_images.dart';
 import 'package:sahm/Features/details_screen/widget/rating.dart';
 import 'package:share_plus/share_plus.dart';
-
+import "package:firebase_analytics/firebase_analytics.dart";
 //! Main screen to display product details
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({
@@ -30,6 +30,21 @@ class DetailsScreen extends StatefulWidget {
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
+  // product view LogEvent 
+  @override
+void initState() {
+  super.initState();
+ FirebaseAnalytics.instance.logEvent(
+    name: "view_product",
+    parameters: {
+      "product_id": widget.product.id,
+      "product_name": widget.product.title,
+      "category": widget.product.category.name,
+      "price": widget.product.price,
+    },
+  );
+}
+
   //! Constant padding used across the widgets
   static const EdgeInsets padding = EdgeInsets.all(10.0);
   @override
