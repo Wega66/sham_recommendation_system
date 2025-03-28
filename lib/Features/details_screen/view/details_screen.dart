@@ -116,6 +116,16 @@ void initState() {
                                             .addFavorite(id: widget.product.id);
                                     widget.product.isFavorite =
                                         !widget.product.isFavorite;
+                                      // add to favorite logEvent
+                                    FirebaseAnalytics.instance.logEvent(
+                                      name: widget.product.isFavorite
+                                          ? "add_to_favorites"
+                                          : "remove_from_favorites",
+                                      parameters: {
+                                        "product_id": widget.product.id,
+                                        "product_name": widget.product.title,
+                                      },
+                                    );
                                   });
                                 },
                                 icon: widget.product.isFavorite
@@ -224,6 +234,15 @@ void initState() {
                         context
                             .read<AddToCartCubit>()
                             .addToCart(id: widget.product.id);
+                      // add to cart logEvent
+                        FirebaseAnalytics.instance.logEvent(
+                          name: "add_to_cart",
+                          parameters: {
+                            "product_id": widget.product.id,
+                            "product_name": widget.product.title,
+                            "price": widget.product.price,
+                          },
+                        );
                       },
                     ),
                   );
