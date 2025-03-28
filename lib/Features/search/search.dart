@@ -15,7 +15,7 @@ import 'package:sahm/controller/shop_home/sahm_cubit.dart';
 import 'package:sahm/core/models/product_model.dart';
 import 'package:sahm/core/shared/shared_prefrances.dart';
 import 'package:sahm/core/themes/text_theme.dart';
-
+import 'package:firebase_analytics/firebase_analytics.dart';
 class Search extends SearchDelegate {
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -40,6 +40,17 @@ class Search extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+  // search logEvent
+   if (query.isNotEmpty) {
+     FirebaseAnalytics.instance.logEvent(
+       name: "search_performed",
+       parameters: {
+         "searched_term": query, 
+         "timestamp": DateTime.now().toString(),
+       },
+     );
+   }
+  
     return BlocBuilder<SahmCubit, SahmState>(
       builder: (context, state) {
         if (state is SahmLoading) {
